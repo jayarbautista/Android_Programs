@@ -1,5 +1,8 @@
 package com.bignerdranch.criminalintent;
 
+import java.util.UUID;
+
+import android.app.Activity;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.text.Editable;
@@ -14,50 +17,70 @@ import android.widget.CompoundButton;
 import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.EditText;
 
+import com.bignerdranch.android.criminalintent.R;
+
 public class CrimeFragment extends Fragment {
-	private Crime mCrime;
-	private EditText mTitleField;
-	private Button mDateButton;
-	private CheckBox mSolvedCheckBox;
+	public static final String EXTRA_CRIME_ID = "com.bignerdranch.criminalintent.crime_id";
 
-	@Override
-	public void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
-		mCrime = new Crime();
-	}
+    Crime mCrime;
+    EditText mTitleField;
+    Button mDateButton;
+    CheckBox mSolvedCheckBox;
 
-	@Override
-	public View onCreateView(LayoutInflater inflater, ViewGroup parent,
-			Bundle savedInstanceState) {
-		View v = inflater.inflate(R.layout.fragment_crime, parent, false);
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        
+        UUID crimeId = (UUID)getActivity().getIntent().getSerializableExtra(EXTRA_CRIME_ID);
+        
+        mCrime = CrimeLab.get(getActivity()).getCrime(crimeId);
+    }
 
-		mTitleField = (EditText) v.findViewById(R.id.crime_title);
-		mTitleField.addTextChangedListener(new TextWatcher() {
-			public void onTextChanged(CharSequence c, int start, int before, int count) {
-				mCrime.setTitle(c.toString());
-			}
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup parent, Bundle savedInstanceState) {
+        View v = inflater.inflate(R.layout.fragment_crime, parent, false);
 
-			public void beforeTextChanged(CharSequence c, int start, int count, int after) {
-				// intentionally left blank
-			}
+        mTitleField = (EditText)v.findViewById(R.id.crime_title);
+        mTitleField.setText(mCrime.getTitle());
+        mTitleField.addTextChangedListener(new TextWatcher() {
+            public void onTextChanged(CharSequence c, int start, int before, int count) {
+                mCrime.setTitle(c.toString());
+            }
 
-			public void afterTextChanged(Editable c) {
-				// intentionally left blank
-			}
-		});
+            public void beforeTextChanged(CharSequence c, int start, int count, int after) {
+                // this space intentionally left blank
+            }
 
-		mDateButton = (Button) v.findViewById(R.id.crime_date);
-		mDateButton.setText(DateFormat.format("EEEE, MMMM dd, yyyy",mCrime.getDate()));
-		mDateButton.setEnabled(false);
+            public void afterTextChanged(Editable c) {
+                // this one too
+            }
+        });
+        
+        mDateButton = (Button)v.findViewById(R.id.crime_date);
+        mDateButton.setText(DateFormat.format("EEEE,  MMMM dd, yyyy", mCrime.getDate()));
+        mDateButton.setEnabled(false);
 
-		mSolvedCheckBox = (CheckBox) v.findViewById(R.id.crime_solved);
-		mSolvedCheckBox.setOnCheckedChangeListener(new OnCheckedChangeListener() {
-			public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-				// Set the crime's solved property
-				mCrime.setSolved(isChecked);
-			}
-		});
-
-		return v;
-	}
+        mSolvedCheckBox = (CheckBox)v.findViewById(R.id.crime_solved);
+        mSolvedCheckBox.setChecked(mCrime.isSolved());
+        mSolvedCheckBox.setOnCheckedChangeListener(new OnCheckedChangeListener() {
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                // set the crime's solved property
+                mCrime.setSolved(isChecked);
+            }
+        });     
+        
+        return v; 
+    }
+    
+    public static CrimeFragment newInstance(UUID crimeId) {
+    	Bundle args = new Bundle();
+    	args.putSerializable(EXTRA_CRIME_ID, crimeId);
+    	CrimeFragment fragment = new CrimeFragment();
+    	fragment.setArguments(args);
+    	return fragment;
+    }
+    
+    //public void returnResult() {
+    //	getActivity().setResult(Activity.RESULT_OK, null);
+    //}
 }
