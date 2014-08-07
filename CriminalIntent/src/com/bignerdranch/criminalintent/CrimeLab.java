@@ -28,7 +28,7 @@ public class CrimeLab {
         }
         return sCrimeLab;
     }
-    
+
     public Crime getCrime(UUID id) {
         for (Crime c : mCrimes) {
             if (c.getId().equals(id))
@@ -36,7 +36,7 @@ public class CrimeLab {
         }
         return null;
     }
-
+    
     public ArrayList<Crime> getCrimes() {
         return mCrimes;
     }

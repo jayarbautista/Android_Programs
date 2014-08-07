@@ -1,16 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-  package="com.bignerdranch.android.criminalintent"
+  package="com.bignerdranch.criminalintent"
   android:versionCode="1"
   android:versionName="1.0" >
 
-  <uses-sdk android:minSdkVersion="8" android:targetSdkVersion="17"/>
+  <uses-sdk android:minSdkVersion="8" android:targetSdkVersion="19"/>
 
-  <application 
+  <application
     android:icon="@drawable/ic_launcher"
     android:label="@string/app_name"
     android:theme="@style/AppTheme" >
-    <activity android:name="com.bignerdranch.criminalintent.CrimeListActivity" >
+    <activity android:name=".CrimeListActivity" >
       <intent-filter>
         <action android:name="android.intent.action.MAIN" />
 
@@ -18,8 +18,11 @@
       </intent-filter>
     </activity>
     <activity
-      android:name="com.bignerdranch.criminalintent.CrimePagerActivity"
+      android:name=".CrimeActivity"
       android:label="@string/app_name" >
+    </activity>
+    <activity android:name=".CrimePagerActivity"
+      android:label="@string/app_name">
     </activity>
   </application>
 

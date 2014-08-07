@@ -1,5 +1,6 @@
 package com.bignerdranch.criminalintent;
 
+import java.text.DateFormat;
 import java.util.Date;
 import java.util.UUID;
 
@@ -46,6 +47,9 @@ public class Crime {
     public void setDate(Date date) {
         mDate = date;
     }
-
+    
+    public String getDateString() {
+        return DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.SHORT).format(mDate);
+    }
 
 }
