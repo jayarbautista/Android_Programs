@@ -26,7 +26,6 @@ import android.widget.TextView;
 public class CrimeListFragment extends ListFragment {
 	private ArrayList<Crime> mCrimes;
 	private boolean mSubtitleVisible;
-	private final String TAG = "CrimeListFragment";
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
