@@ -1,19 +1,20 @@
 package com.bignerdranch.criminalintent;
 
-import java.util.Calendar;
 import java.util.Date;
-import java.util.GregorianCalendar;
 import java.util.UUID;
 
+import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
+import android.support.v4.app.NavUtils;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
@@ -47,21 +48,29 @@ public class CrimeFragment extends Fragment {
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-
+		setHasOptionsMenu(true);
 		UUID crimeId = (UUID) getArguments().getSerializable(EXTRA_CRIME_ID);
 		mCrime = CrimeLab.get(getActivity()).getCrime(crimeId);
 
 	}
-	
+
 	public void updateDate() {
 		mDateButton.setText(mCrime.getDate().toString());
-		//mDateButton.setText(DateFormat.format("EEEE, MMMM dd, yyyy", mCrime.getDate()));
+		// mDateButton.setText(DateFormat.format("EEEE, MMMM dd, yyyy",
+		// mCrime.getDate()));
 	}
 
+	@TargetApi(11)
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup parent,
 			Bundle savedInstanceState) {
 		View v = inflater.inflate(R.layout.fragment_crime, parent, false);
+
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+			if (NavUtils.getParentActivityName(getActivity()) != null) {
+				getActivity().getActionBar().setDisplayHomeAsUpEnabled(true);
+			}
+		}
 
 		mTitleField = (EditText) v.findViewById(R.id.crime_title);
 		mTitleField.setText(mCrime.getTitle());
@@ -83,19 +92,23 @@ public class CrimeFragment extends Fragment {
 
 		mDateButton = (Button) v.findViewById(R.id.crime_date);
 		updateDate();
-		//mDateButton.setText(DateFormat.format("EEEE, MMMM dd, yyyy", mCrime.getDate()));
-		//mDateButton.setText(mCrime.getDate().toString());
-		//mDateButton.setEnabled(false);
+		// mDateButton.setText(DateFormat.format("EEEE, MMMM dd, yyyy",
+		// mCrime.getDate()));
+		// mDateButton.setText(mCrime.getDate().toString());
+		// mDateButton.setEnabled(false);
 		mDateButton.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {
 				FragmentManager fm = getActivity().getSupportFragmentManager();
-				DatePickerFragment dialog = DatePickerFragment.newInstance(mCrime.getDate());
+				DatePickerFragment dialog = DatePickerFragment
+						.newInstance(mCrime.getDate());
 				dialog.setTargetFragment(CrimeFragment.this, REQUEST_DATE);
 				dialog.show(fm, DIALOG_DATE);
-				
-		       // ChoiceDialogFragment dialogFragment = new ChoiceDialogFragment();
-		       // dialogFragment.setTargetFragment(CrimeFragment.this, REQUEST_CHOICE);
-		       // dialogFragment.show(fm, null);
+
+				// ChoiceDialogFragment dialogFragment = new
+				// ChoiceDialogFragment();
+				// dialogFragment.setTargetFragment(CrimeFragment.this,
+				// REQUEST_CHOICE);
+				// dialogFragment.show(fm, null);
 			}
 		});
 
@@ -117,76 +130,70 @@ public class CrimeFragment extends Fragment {
 	public void onActivityResult(int requestCode, int resultCode, Intent data) {
 		if (resultCode != Activity.RESULT_OK)
 			return;
-		
+
 		if (requestCode == REQUEST_DATE) {
-			Date date = (Date)data.getSerializableExtra(DatePickerFragment.EXTRA_DATE);
+			Date date = (Date) data
+					.getSerializableExtra(DatePickerFragment.EXTRA_DATE);
 			mCrime.setDate(date);
 			mDateButton.setText(mCrime.getDate().toString());
 		}
 	}
-		
-	/*
-		if (requestCode == REQUEST_DATE) {
-            Date date = (Date)data.getSerializableExtra(DatePickerFragment.EXTRA_DATE);
-            combineDate(date);
-            updateDate();
-        }
-        if (requestCode == REQUEST_TIME) {
-            Date date = (Date)data.getSerializableExtra(TimePickerFragment.EXTRA_TIME);
-            combineTime(date);
-            updateDate();
-        }
 
-        if (requestCode == REQUEST_CHOICE) {
-            int choice = data.getIntExtra(ChoiceDialogFragment.EXTRA_CHOICE, 0);
-            if (choice == 0) {
-                Log.d("choice dialog", "requested choice returned nothing");
-                return;
-            }
-            if (choice == ChoiceDialogFragment.CHOICE_TIME) editTimeDialog();
-            else if (choice == ChoiceDialogFragment.CHOICE_DATE) editDateDialog();
-        }
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		switch (item.getItemId()) {
+			case android.R.id.home:
+				if (NavUtils.getParentActivityName(getActivity()) != null) {
+					NavUtils.navigateUpFromSameTask(getActivity());
+				}
+				return true;
+			default:
+				return super.onOptionsItemSelected(item);
+		}
 	}
-	
-	private void editDateDialog() {
-        FragmentManager fm = getActivity().getSupportFragmentManager();
-        DatePickerFragment dialog = DatePickerFragment.newInstance(mCrime.getDate());
-        dialog.setTargetFragment(CrimeFragment.this, REQUEST_DATE);
-        dialog.show(fm, null);
-    }
 
-    private void editTimeDialog() {
-        FragmentManager fm = getActivity().getSupportFragmentManager();
-        TimePickerFragment dialog = TimePickerFragment.newInstance(mCrime.getDate());
-        dialog.setTargetFragment(CrimeFragment.this, REQUEST_TIME);
-        dialog.show(fm, null);
-    }
-
-
-    private void combineTime(Date time) {
-        Calendar cal = Calendar.getInstance();
-        cal.setTime(mCrime.getDate());
-        int year = cal.get(Calendar.YEAR);
-        int month = cal.get(Calendar.MONTH);
-        int day = cal.get(Calendar.DAY_OF_MONTH);
-        cal.setTime(time);
-        int hours = cal.get(Calendar.HOUR_OF_DAY);
-        int mins = cal.get(Calendar.MINUTE);
-        Date finalD = new GregorianCalendar(year, month, day, hours, mins).getTime();
-        mCrime.setDate(finalD);
-    }
-
-    private void combineDate(Date date) {
-        Calendar cal = Calendar.getInstance();
-        cal.setTime(date);
-        int year = cal.get(Calendar.YEAR);
-        int month = cal.get(Calendar.MONTH);
-        int day = cal.get(Calendar.DAY_OF_MONTH);
-        cal.setTime(mCrime.getDate());
-        int hours = cal.get(Calendar.HOUR_OF_DAY);
-        int mins = cal.get(Calendar.MINUTE);
-
-        Date finalD = new GregorianCalendar(year, month, day, hours, mins).getTime();
-        mCrime.setDate(finalD);
-    }*/
+	/*
+	 * if (requestCode == REQUEST_DATE) { Date date =
+	 * (Date)data.getSerializableExtra(DatePickerFragment.EXTRA_DATE);
+	 * combineDate(date); updateDate(); } if (requestCode == REQUEST_TIME) {
+	 * Date date =
+	 * (Date)data.getSerializableExtra(TimePickerFragment.EXTRA_TIME);
+	 * combineTime(date); updateDate(); }
+	 * 
+	 * if (requestCode == REQUEST_CHOICE) { int choice =
+	 * data.getIntExtra(ChoiceDialogFragment.EXTRA_CHOICE, 0); if (choice == 0)
+	 * { Log.d("choice dialog", "requested choice returned nothing"); return; }
+	 * if (choice == ChoiceDialogFragment.CHOICE_TIME) editTimeDialog(); else if
+	 * (choice == ChoiceDialogFragment.CHOICE_DATE) editDateDialog(); } }
+	 * 
+	 * private void editDateDialog() { FragmentManager fm =
+	 * getActivity().getSupportFragmentManager(); DatePickerFragment dialog =
+	 * DatePickerFragment.newInstance(mCrime.getDate());
+	 * dialog.setTargetFragment(CrimeFragment.this, REQUEST_DATE);
+	 * dialog.show(fm, null); }
+	 * 
+	 * private void editTimeDialog() { FragmentManager fm =
+	 * getActivity().getSupportFragmentManager(); TimePickerFragment dialog =
+	 * TimePickerFragment.newInstance(mCrime.getDate());
+	 * dialog.setTargetFragment(CrimeFragment.this, REQUEST_TIME);
+	 * dialog.show(fm, null); }
+	 * 
+	 * 
+	 * private void combineTime(Date time) { Calendar cal =
+	 * Calendar.getInstance(); cal.setTime(mCrime.getDate()); int year =
+	 * cal.get(Calendar.YEAR); int month = cal.get(Calendar.MONTH); int day =
+	 * cal.get(Calendar.DAY_OF_MONTH); cal.setTime(time); int hours =
+	 * cal.get(Calendar.HOUR_OF_DAY); int mins = cal.get(Calendar.MINUTE); Date
+	 * finalD = new GregorianCalendar(year, month, day, hours, mins).getTime();
+	 * mCrime.setDate(finalD); }
+	 * 
+	 * private void combineDate(Date date) { Calendar cal =
+	 * Calendar.getInstance(); cal.setTime(date); int year =
+	 * cal.get(Calendar.YEAR); int month = cal.get(Calendar.MONTH); int day =
+	 * cal.get(Calendar.DAY_OF_MONTH); cal.setTime(mCrime.getDate()); int hours
+	 * = cal.get(Calendar.HOUR_OF_DAY); int mins = cal.get(Calendar.MINUTE);
+	 * 
+	 * Date finalD = new GregorianCalendar(year, month, day, hours,
+	 * mins).getTime(); mCrime.setDate(finalD); }
+	 */
 }
