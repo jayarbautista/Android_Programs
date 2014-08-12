@@ -1,6 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
 <resources>
-
     <string name="app_name">RunTracker</string>
     <string name="started">Started:</string>
     <string name="latitude">Latitude:</string>
@@ -11,6 +9,5 @@
     <string name="stop">Stop</string>
     <string name="gps_enabled">GPS Enabled</string>
     <string name="gps_disabled">GPS Disabled</string>
-    <string name="cell_text">Run at %1$s</string>
-
+    <string name="new_run">New Run</string>
 </resources>
